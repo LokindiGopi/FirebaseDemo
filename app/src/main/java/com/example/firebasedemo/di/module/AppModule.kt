@@ -3,6 +3,7 @@ package com.example.firebasedemo.di.module
 import com.example.firebasedemo.data.remote.Repository.UserRepoImpl
 import com.example.firebasedemo.domain.Repository.UserRepo
 import com.example.firebasedemo.domain.usecases.AddUserUserCase
+import com.example.firebasedemo.domain.usecases.DeleteUserUserCase
 import com.example.firebasedemo.domain.usecases.GetUserUserCase
 import com.example.firebasedemo.domain.usecases.UpdateUserUserCase
 import com.google.firebase.Firebase
@@ -39,4 +40,9 @@ class AppModule {
     @Provides
     @Singleton
     fun providesUpdateUserUserCase(userRepo: UserRepo): UpdateUserUserCase = UpdateUserUserCase(userRepo)
+
+    @Provides
+    @Singleton
+    fun providesDeleteUserUserCase(userRepo: UserRepo): DeleteUserUserCase = DeleteUserUserCase(userRepo)
+
 }

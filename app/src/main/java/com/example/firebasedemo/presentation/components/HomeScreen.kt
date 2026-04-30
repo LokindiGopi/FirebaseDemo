@@ -1,5 +1,6 @@
 package com.example.firebasedemo.presentation.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,8 +31,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.firebasedemo.domain.model.User
 import com.example.firebasedemo.presentation.viewmodel.UserViewmodel
@@ -48,6 +51,7 @@ fun HomeScreen(viewmodel: UserViewmodel = hiltViewModel()) {
     val address = remember { mutableStateOf("") }
     val profession = remember { mutableStateOf("") }
     val email = remember { mutableStateOf("") }
+    val selectedUser = remember { mutableStateOf<User?>(null) }
 
 
     val uiState = viewmodel.users.collectAsState()
@@ -98,45 +102,54 @@ fun HomeScreen(viewmodel: UserViewmodel = hiltViewModel()) {
                             ) {
                                 Row(modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(text = "Name:${users.users[it].name}", modifier = Modifier.padding(10.dp))
+                                    Text(text = "Name:${users.users[it].name}", fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(10.dp))
                                     IconButton(
                                         onClick = {
                                             showDialog.value = true
-                                            viewmodel.updateUser(User(
-                                                id = users.users[it].id,
-                                                name = name.value,
-                                                age = age.value,
-                                                address = address.value,
-                                                profession = profession.value,
-                                                email = email.value
-                                            ))
+                                            selectedUser.value = users.users[it]
+
+                                            name.value = users.users[it].name
+                                            age.value = users.users[it].age
+                                            address.value = users.users[it].address
+                                            profession.value = users.users[it].profession
+                                            email.value = users.users[it].email
+                                            Log.d("Select user", "$selectedUser")
                                         }
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Edit,
-                                            contentDescription = "Edit"
+                                            contentDescription = "Edit",
+                                            tint = Color.Blue
                                         )
                                     }
                                     IconButton(
-                                        onClick = {}
+                                        onClick = {
+                                            selectedUser.value = users.users[it]
+                                            Log.d("check", "HomeScreen: $selectedUser")
+                                            viewmodel.deleteUser(
+                                                selectedUser.value?.id ?:""
+                                            )
+                                        }
                                     ){
                                         Icon(
                                             imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete"
+                                            contentDescription = "Delete",
+                                            tint = Color.Red
+
                                         )
                                     }
 
                                 }
 
-                                Spacer(modifier = Modifier.padding(8.dp))
-                                Text("Age: ${users.users[it].age}")
-                                Spacer(modifier = Modifier.padding(8.dp),)
-                                Text("Address: ${users.users[it].address}")
-                                Spacer(modifier = Modifier.padding(8.dp))
-                                Text("Profession: ${users.users[it].profession}")
-                                Spacer(modifier = Modifier.padding(8.dp))
-                                Text("Email: ${users.users[it].email}")
-                                Spacer(modifier = Modifier.padding(8.dp))
+                                Spacer(modifier = Modifier.padding(3.dp))
+                                Text(text = "Age: ${users.users[it].age}",Modifier.padding(8.dp))
+                                Spacer(modifier = Modifier.padding(3.dp),)
+                                Text("Address: ${users.users[it].address}",Modifier.padding(8.dp))
+                                Spacer(modifier = Modifier.padding(3.dp))
+                                Text("Profession: ${users.users[it].profession}",Modifier.padding(8.dp))
+                                Spacer(modifier = Modifier.padding(3.dp))
+                                Text("Email: ${users.users[it].email}",Modifier.padding(8.dp))
+                                Spacer(modifier = Modifier.padding(3.dp))
                             }
                         }
                     }
@@ -190,15 +203,31 @@ fun HomeScreen(viewmodel: UserViewmodel = hiltViewModel()) {
             confirmButton = {
                 Button(
                     onClick = {
-                        viewmodel.addUsers(
-                            User(
-                                name = name.value,
-                                age = age.value,
-                                address = address.value,
-                                profession = profession.value,
-                                email = email.value
+
+                        val user = selectedUser.value
+
+                        if (user != null && user.id.isNotEmpty()) {
+                            viewmodel.updateUser(
+                                user.copy(
+                                    name = name.value,
+                                    age = age.value,
+                                    address = address.value,
+                                    profession = profession.value,
+                                    email = email.value
+                                )
                             )
-                        )
+                        }
+                        else{
+                            viewmodel.addUsers(
+                                User(
+                                    name = name.value,
+                                    age = age.value,
+                                    address = address.value,
+                                    profession = profession.value,
+                                    email = email.value
+                                )
+                            )
+                        }
                         showDialog.value = false
                     }
                 ) {

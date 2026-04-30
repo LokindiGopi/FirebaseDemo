@@ -9,7 +9,7 @@ interface UserRepo {
 
     suspend fun updateUser(user: User)
 
-    suspend fun deleteUser(user: User)
+    suspend fun deleteUser(userId: String)
 
     suspend fun getAllUser(onSuccess:(List<User>)-> Unit,onError:(String)->Unit)
 
